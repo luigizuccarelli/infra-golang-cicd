@@ -12,7 +12,7 @@ resources:
   - namespace/namespace.yaml
   - namespace/limit-range.yaml
   - namespace/resource-quota.yaml
-  - shared/pipeline-pvcs.yaml
+  - shared/pipeline-pvc.yaml
  
 namespace: golang-cicd
 
