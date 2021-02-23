@@ -1,6 +1,7 @@
 namePrefix: 
 
 resources:
+  - configmap.yaml
   - deploy.yaml
   - service.yaml
 
