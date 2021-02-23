@@ -1,6 +1,5 @@
 namePrefix: 
-commonLabels:
-  app: golang-gitwebhook-interface
+
 bases:
   - pipeline-dev.yaml
 

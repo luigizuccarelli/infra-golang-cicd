@@ -1,6 +1,5 @@
 namePrefix: 
-commonLabels:
-  app: golang-gitwebhook-interface
+
 bases:
   - golang-build-dev.yaml
   - golang-clean-dev.yaml
