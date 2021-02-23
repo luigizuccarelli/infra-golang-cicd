@@ -3,6 +3,7 @@ kind: Kustomization
 bases:
   - ../../../manifests/tekton/rbac/base
   - ../../../manifests/tekton/secrets/base
+  - ../../../manifests/tekton/triggers/base
 resources:
   - namespace/namespace.yaml
   - namespace/limit-range.yaml

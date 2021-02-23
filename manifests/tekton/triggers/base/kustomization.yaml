@@ -1,6 +1,5 @@
 namePrefix: 
-commonLabels:
-  app: golang-gitwebhook-interface
+
 bases:
   - trigger-binding-dev.yaml
   - trigger-binding-prd.yaml
