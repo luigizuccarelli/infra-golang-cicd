@@ -1,7 +1,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  
+  name: golang-cicd
   namespace: golang-cicd
   labels:
     app: golang-gitwebhook-interface
@@ -16,7 +16,7 @@ spec:
       targetPort: 9000
   selector:
     name: golang-gitwebhook-interface
-  clusterIP: 
+  clusterIP:
   type: ClusterIP
   sessionAffinity: None
 status:
