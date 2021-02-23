@@ -2,6 +2,6 @@ namePrefix:
 commonLabels:
   app: golang-gitwebhook-interface
 resources:
-  - deployment.yaml
+  - deploy.yaml
   - service.yaml
 
