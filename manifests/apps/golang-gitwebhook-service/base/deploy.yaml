@@ -8,7 +8,7 @@ metadata:
     app: golang-gitwebhook-interface
     app.kubernetes.io/component: golang-gitwebhook-interface
     app.kubernetes.io/instance: golang-gitwebhook-interface
-  name: golang-cicd
+  name: golang-gitwebhook-interface
 
 spec:
   strategy:
