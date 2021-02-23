@@ -1,4 +1,6 @@
-resources:
+bases:
   - admin.yaml
   - edit.yaml
   - view.yaml
+  
+namespace: golang-cicd
