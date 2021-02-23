@@ -46,7 +46,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /isalive
-             port: 9000
+              port: 9000
               scheme: HTTP
             initialDelaySeconds: 55
             timeoutSeconds: 5
