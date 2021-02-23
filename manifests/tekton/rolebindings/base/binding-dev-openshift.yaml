@@ -1,0 +1,40 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: admin-0
+  namespace: sandbox-lzuccarelli
+  selfLink: >-
+    /apis/rbac.authorization.k8s.io/v1/namespaces/sandbox-lzuccarelli/rolebindings/admin-0
+  uid: 395a98cd-6150-41ca-8c5b-be3cc1410ea0
+  resourceVersion: '221336404'
+  creationTimestamp: '2020-12-01T14:56:59Z'
+  managedFields:
+    - manager: oc
+      operation: Update
+      apiVersion: rbac.authorization.k8s.io/v1
+      time: '2020-12-01T14:56:59Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:roleRef':
+          'f:apiGroup': {}
+          'f:kind': {}
+          'f:name': {}
+    - manager: Mozilla
+      operation: Update
+      apiVersion: rbac.authorization.k8s.io/v1
+      time: '2020-12-04T12:36:29Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:subjects': {}
+subjects:
+  - kind: User
+    apiGroup: rbac.authorization.k8s.io
+    name: lzuccarelli
+  - kind: ServiceAccount
+    name: serviceaccount-dev
+    namespace: sandbox-lzuccarelli
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: admin
+

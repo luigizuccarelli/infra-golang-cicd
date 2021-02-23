@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: golang-cicd
+  labels:
+    cost-tenancy: Dedicated
+    dept: Development
+    org: lmzsoftware
+    network-share: lmzsoftware
+    product: golang-cicd

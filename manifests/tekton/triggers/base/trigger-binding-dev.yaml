@@ -1,0 +1,20 @@
+apiVersion: triggers.tekton.dev/v1alpha1 
+kind: TriggerBinding 
+metadata:
+  name: trigger-binding-dev
+spec:
+  params: 
+  - name: repo-url
+    value: $(body.url)
+  - name: repo-name
+    value: $(body.name)
+  - name: repo-hash
+    value: $(body.hash)
+  - name: actor-name
+    value: $(body.actorname)
+  - name: actor-email
+    value: $(body.actoremail)
+  - name: message
+    value: $(body.message) 
+  - name: infra-repo
+    value: $(body.infrarepo)

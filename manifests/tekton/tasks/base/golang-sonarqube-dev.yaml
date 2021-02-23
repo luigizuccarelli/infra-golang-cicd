@@ -1,0 +1,107 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: golang-sonarqube-dev
+spec:
+  params:
+  - name: message
+    description: The message to print
+    default: This is the default message
+    type: string
+  - name: repo-name
+    description: The name of the repo
+    type: string
+  - name: repo-url
+    description: The url of the repo
+    type: string
+  - name: repo-hash
+    description: The commit hash of the repo
+    type: string
+  - name: actor-name
+    description: The actor
+    type: string
+  - name: actor-email
+    description: The actors email
+    type: string
+  - name: SONAR_HOST_URL
+    description: SonarQube host
+    type: string
+  - name: SONAR_PROJECT_KEY
+    description: The project key
+    type: string
+  - name: SONAR_SECRET
+    description: Sonarqube access token
+    type: string
+    
+  workspaces:
+    - name: output
+       
+  steps: 
+  - name: info
+    image: bash
+    command: ["bash", "-c"]
+    args: ["echo -e 'Pipeline run project : $(params.repo-name)\ncommit hash :  $(params.repo-hash)\nuser info : $(params.actor-name) : $(params.actor-email)\nsonarqube url : $(params.SONAR_HOST_URL)'"]
+    
+  - name: sonar-properties-create
+    image: registry.access.redhat.com/ubi8/ubi-minimal:latest
+    workingDir: /workspace/output/$(params.repo-name)
+    env:
+    - name: SONAR_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: $(params.SONAR_SECRET)
+          key: token    
+     
+    script: |
+      #!/usr/bin/env bash
+        
+      touch sonar-project.properties
+      echo "sonar.login=$SONAR_TOKEN" >> sonar-project.properties
+      echo "sonar.projectKey=$(params.SONAR_PROJECT_KEY)" >> sonar-project.properties
+      echo "sonar.host.url=$(params.SONAR_HOST_URL)" >> sonar-project.properties
+
+      echo "---------------------------"
+      cat sonar-project.properties
+
+  - name: sonar-scan
+    image: sonarsource/sonar-scanner-cli
+    workingDir: /workspace/output/$(params.repo-name)
+    
+    script: |
+      #!/usr/bin/env bash
+
+      sonar-scanner > response.txt
+  - name: sonar-quality-gate
+    image:  dwdraju/alpine-curl-jq
+    workingDir: /workspace/output/$(params.repo-name)
+    env:
+    - name: SONAR_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: $(params.SONAR_SECRET)
+          key: token
+    script: |
+      #!/usr/bin/env bash
+
+      status="PENDING"
+      uri=$(cat response.txt | grep -o "$(params.SONAR_HOST_URL)/api/ce/task?id=[A-Za-z0-9\-]*")
+      rm response.txt
+
+      # loop until we have a valid response status
+      while [ "$status" == "PENDING" ] || [ "$status" == "IN_PORGRESS" ];
+      do
+        sleep 2;
+        status=$(curl -u "$SONAR_TOKEN:" -H 'Content-Type: application/json' -H 'Accept: application/json'  "$uri" | jq '.task.status')
+        echo "status check::: $status";
+      done
+      echo "See Quality Gate Sonarqube Scan results: $uri"
+      # check to see if the job was succesful
+      if [ "$status" != "\"SUCCESS\"" ];
+      then
+        echo "SONARQUBE SCAN FAILED!"
+        exit -1
+      else
+        echo "SONARQUBE SCAN PASSED!"
+        exit 0
+      fi
+ 

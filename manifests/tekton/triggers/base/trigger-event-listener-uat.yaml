@@ -1,0 +1,13 @@
+---
+apiVersion: triggers.tekton.dev/v1alpha1 
+kind: EventListener 
+metadata:
+  name: eventlistener-uat
+spec:
+  
+  triggers:
+  - name: cicd-pipeline-trigger
+    bindings: 
+      - ref: trigger-binding-uat
+    template: 
+      ref: trigger-template-uat

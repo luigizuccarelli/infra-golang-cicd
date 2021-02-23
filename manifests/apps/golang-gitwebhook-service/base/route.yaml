@@ -1,0 +1,23 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  
+  name: gitea-webhook
+  namespace: golang-cicd
+    labels:
+    app: golang-gitwebhook-interface
+    app.kubernetes.io/component: golang-gitwebhook-interface
+    app.kubernetes.io/instance: golang-gitwebhook-interface
+    name: golang-gitwebhook-interface
+spec:
+  to:
+    kind: Service
+    name: golang-gitwebhook-interface
+    weight: 100
+  port:
+    targetPort: golang-gitwebhook-interface-port
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
+

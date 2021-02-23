@@ -1,0 +1,24 @@
+kind: Service
+apiVersion: v1
+metadata:
+  
+  namespace: golang-cicd
+  labels:
+    app: golang-gitwebhook-interface
+    app.kubernetes.io/component: golang-gitwebhook-interface
+    app.kubernetes.io/instance: golang-gitwebhook-interface
+    name: golang-gitwebhook-interface
+spec:
+  ports:
+    - name: golang-gitwebhook-interface-port
+      protocol: TCP
+      port: 9000
+      targetPort: 9000
+  selector:
+    name: golang-gitwebhook-interface
+  clusterIP: 
+  type: ClusterIP
+  sessionAffinity: None
+status:
+  loadBalancer: {}
+

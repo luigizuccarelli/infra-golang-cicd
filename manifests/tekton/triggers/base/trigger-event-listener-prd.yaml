@@ -1,0 +1,13 @@
+---
+apiVersion: triggers.tekton.dev/v1alpha1 
+kind: EventListener 
+metadata:
+  name: eventlistener-prod
+spec:
+  
+  triggers:
+  - name: cicd-pipeline-trigger
+    bindings: 
+      - ref: trigger-binding-prod
+    template: 
+      ref: trigger-template-prod
