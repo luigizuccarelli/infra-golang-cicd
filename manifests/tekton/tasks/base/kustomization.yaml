@@ -1,0 +1,11 @@
+namePrefix: 
+commonLabels:
+  app: golang-gitwebhook-interface
+bases:
+  - golang-build-dev.yaml
+  - golang-clean-dev.yaml
+  - golang-sonarqube-dev.yaml
+  - golang-test-dev.yaml
+
+
+
