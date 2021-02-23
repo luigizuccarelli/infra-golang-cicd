@@ -2,14 +2,14 @@ namePrefix:
 
 bases:
   - trigger-binding-dev.yaml
-  - trigger-binding-prd.yaml
-  - trigger-binding-uat.yaml
+  #- trigger-binding-prd.yaml
+  #- trigger-binding-uat.yaml
   - trigger-event-listener-dev.yaml
-  - trigger-event-listener-prd.yaml
-  - trigger-event-listener-uat.yaml
+  #- trigger-event-listener-prd.yaml
+  #- trigger-event-listener-uat.yaml
   - trigger-template-dev.yaml
-  - trigger-template-prd.yaml
-  - trigger-template-uat.yaml
+  #- trigger-template-prd.yaml
+  #- trigger-template-uat.yaml
 
 
 
