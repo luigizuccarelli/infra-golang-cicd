@@ -16,9 +16,5 @@ spec:
       targetPort: 9000
   selector:
     name: golang-gitwebhook-interface
-  clusterIP:
-  type: ClusterIP
-  sessionAffinity: None
-status:
-  loadBalancer: {}
+
 
