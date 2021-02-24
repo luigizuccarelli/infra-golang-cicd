@@ -4,7 +4,7 @@ metadata:
   name: golang-gitwebhook-interface
   namespace: golang-cicd
   labels:
-    app: golang-cicd
+    app: golang-gitwebhook-interface
     app.kubernetes.io/component: golang-gitwebhook-interface
     app.kubernetes.io/instance: golang-gitwebhook-interface
     name: golang-gitwebhook-interface

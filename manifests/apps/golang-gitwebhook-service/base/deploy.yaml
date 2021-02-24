@@ -8,6 +8,7 @@ metadata:
     app: golang-gitwebhook-interface
     app.kubernetes.io/component: golang-gitwebhook-interface
     app.kubernetes.io/instance: golang-gitwebhook-interface
+    name: golang-gitwebhook-interface
   name: golang-gitwebhook-interface
 
 spec:
@@ -23,6 +24,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io: golang-gitwebhook-interface
+        name: golang-gitwebhook-interface
     spec:
       containers:
         - resources:
@@ -68,11 +70,11 @@ spec:
             - name: NAME
               value: golang-gitwebhook-interface
             - name: URL_DEV
-              value: 'http://el-eventlistener-dev:8080'
+              value: 'http://el-eventlistener-dev.golang-cicd.svc.cluster.local:8080'
             - name: URL_UAT
-              value: 'http://el-eventlistener-uat:8080'
+              value: 'http://el-eventlistener-dev.golang-cicd.svc.cluster.local:8080'
             - name: URL_PROD
-              value: 'http://el-eventlistener-prod:8080'
+              value: 'http://el-eventlistener-dev.golang-cicd.svc.cluster.local:8080'
             - name: REPO_MAPPING
               valueFrom:
                 configMapKeyRef:
@@ -84,7 +86,7 @@ spec:
           imagePullPolicy: Always
           terminationMessagePolicy: File
           image: >-
-            quay.io/luigizuccarelli/golang-gitwebhook-service:1.15.6
+            quay.io/luigizuccarelli/golang-gitwebhook-interface:1.15.6
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
