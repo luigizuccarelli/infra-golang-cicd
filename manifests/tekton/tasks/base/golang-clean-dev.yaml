@@ -28,27 +28,36 @@ spec:
     - name: output
        
   steps: 
-  - name: info
-    image: bash
-    command: ["bash", "-c"]
-    args: ["echo -e 'Pipeline run project : $(params.repo-name)\ncommit hash :  $(params.repo-hash)\nuser info : $(params.actor-name) : $(params.actor-email)'"]
+  #- name: info
+  #  image: bash
+  #  command: ["bash", "-c"]
+  #  args: ["echo -e 'Pipeline run project : $(params.repo-name)\ncommit hash :  $(params.repo-hash)\nuser info : $(params.actor-name) : $(params.actor-email)'"]
     
-  - name: list
-    image: bash
-    command: ["bash", "-c"]
-    args: ["ls -la"]
-    workingDir: /workspace/output
+  #- name: list
+  #  image: bash
+  #  command: ["bash", "-c"]
+  #  args: ["ls -la"]
+  #  workingDir: /workspace/output
   
   - name: run-clean
     image: quay.io/luigizuccarelli/golang-base:1.15.6
     resources:
       limits:
         cpu: 100m
-        memory: 3500Mi
+        memory: 1500Mi
       requests:
         cpu: 100m
-        memory: 3500Mi
+        memory: 1500Mi
     workingDir: /workspace/output/$(params.repo-name)
     command: ["make"]
     args: ["clean"]
+    volumeMounts:
+    - name: build-cache
+      mountPath: /home/1001/pkg
+
+  volumes:
+  - name: build-cache
+    persistentVolumeClaim:
+      claimName: build-cache-pvc-dev
+
  

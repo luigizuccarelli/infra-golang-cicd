@@ -12,5 +12,6 @@ resources:
   - namespace/limit-range.yaml
   - namespace/resource-quota.yaml
   - shared/pipeline-pvc.yaml
+  - shared/build-cache-pvc.yaml
 namespace: golang-cicd
 

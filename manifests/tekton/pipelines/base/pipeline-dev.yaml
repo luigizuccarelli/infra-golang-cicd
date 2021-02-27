@@ -26,7 +26,7 @@ spec:
   - name: SONAR_HOST_URL
     type: string
     description: The sonarqube host url
-    default: http://george-sonarqube:9000
+    default: http://192.168.1.25:9000
   - name: infra-repo
     type: string
     description: The infra repo
@@ -66,18 +66,18 @@ spec:
     taskRef:
       name: golang-clean-dev
     params:
-    - name: message
-      value: $(params.message)
-    - name: repo-name
-      value: $(params.repo-name)
-    - name: repo-url
-      value: $(params.repo-url)
-    - name: repo-hash
-      value: $(params.repo-hash)
-    - name: actor-name
-      value: $(params.actor-name)
-    - name: actor-email
-      value: $(params.actor-email)
+      - name: message
+        value: $(params.message)
+      - name: repo-name
+        value: $(params.repo-name)
+      - name: repo-url
+        value: $(params.repo-url)
+      - name: repo-hash
+        value: $(params.repo-hash)
+      - name: actor-name
+        value: $(params.actor-name)
+      - name: actor-email
+        value: $(params.actor-email)
     workspaces:
       - name: output
         workspace: shared-workspace
@@ -87,18 +87,18 @@ spec:
     taskRef:
       name: golang-test-dev
     params:
-    - name: message
-      value: $(params.message)
-    - name: repo-name
-      value: $(params.repo-name)
-    - name: repo-url
-      value: $(params.repo-url)
-    - name: repo-hash
-      value: $(params.repo-hash)
-    - name: actor-name
-      value: $(params.actor-name)
-    - name: actor-email
-      value: $(params.actor-email)
+      - name: message
+        value: $(params.message)
+      - name: repo-name
+        value: $(params.repo-name)
+      - name: repo-url
+        value: $(params.repo-url)
+      - name: repo-hash
+        value: $(params.repo-hash)
+      - name: actor-name
+        value: $(params.actor-name)
+      - name: actor-email
+        value: $(params.actor-email)
     workspaces:
       - name: output
         workspace: shared-workspace
@@ -108,24 +108,24 @@ spec:
     taskRef:
       name: golang-sonarqube-dev
     params:
-    - name: message
-      value: $(params.message)
-    - name: repo-name
-      value: $(params.repo-name)
-    - name: repo-url
-      value: $(params.repo-url)
-    - name: repo-hash
-      value: $(params.repo-hash)
-    - name: actor-name
-      value: $(params.actor-name)
-    - name: actor-email
-      value: $(params.actor-email)
-    - name: SONAR_HOST_URL
-      value: $(params.SONAR_HOST_URL)
-    - name: SONAR_PROJECT_KEY
-      value: $(params.repo-name)
-    - name: SONAR_SECRET
-      value: sonarqube-access-token
+      - name: message
+        value: $(params.message)
+      - name: repo-name
+        value: $(params.repo-name)
+      - name: repo-url
+        value: $(params.repo-url)
+      - name: repo-hash
+        value: $(params.repo-hash)
+      - name: actor-name
+        value: $(params.actor-name)
+      - name: actor-email
+        value: $(params.actor-email)
+      - name: SONAR_HOST_URL
+        value: $(params.SONAR_HOST_URL)
+      - name: SONAR_PROJECT_KEY
+        value: $(params.repo-name)
+      - name: SONAR_SECRET
+        value: sonarqube-access-token
       
     workspaces:
       - name: output
@@ -136,54 +136,48 @@ spec:
     taskRef:
       name: golang-build-dev
     params:
-    - name: message
-      value: $(params.message)
-    - name: repo-name
-      value: $(params.repo-name)
-    - name: repo-url
-      value: $(params.repo-url)
-    - name: repo-hash
-      value: $(params.repo-hash)
-    - name: actor-name
-      value: $(params.actor-name)
-    - name: actor-email
-      value: $(params.actor-email)
+      - name: message
+        value: $(params.message)
+      - name: repo-name
+        value: $(params.repo-name)
+      - name: repo-url
+        value: $(params.repo-url)
+      - name: repo-hash
+        value: $(params.repo-hash)
+      - name: actor-name
+        value: $(params.actor-name)
+      - name: actor-email
+        value: $(params.actor-email)
+      - name: IMAGE_REG_BASE
+        value: 'quay.io/luigizuccarelli/'
     workspaces:
       - name: output
         workspace: shared-workspace
         
   - name: patch-image
     taskRef:
-      name: clone-patch-image
       kind: ClusterTask
+      name: clone-patch-image
     runAfter: [golang-build-dev]
     workspaces:
       - name: output
         workspace: shared-workspace
      
     params:
-    - name: message
-      value: $(params.message)
-    - name: repo-name
-      value: $(params.repo-name)
-    - name: repo-url
-      value: $(params.repo-url)
-    - name: repo-hash
-      value: $(params.repo-hash)
-    - name: actor-name
-      value: $(params.actor-name)
-    - name: actor-email
-      value: $(params.actor-email)
-    - name: URL
-      value: $(params.infra-repo)
-    - name: IMAGE_TAG
-      value: $(params.repo-hash)
-    - name: REVISION
-      value: HEAD
-    - name: GIT_AUTHOR_NAME
-      value: $(params.actor-name)
-    - name: GIT_AUTHOR_EMAIL
-      value: $(params.actor-email)
-    - name: MANIFEST_FILE
-      value: environments/overlays/dev/patches/patch-$(params.repo-name)-image.yaml
+      - name: URL
+        value: $(params.infra-repo)
+      - name: repo-name
+        value: $(params.repo-name)
+      - name: revision
+        value: master
+      - name: COMMIT_HASH
+        value: $(params.repo-hash)
+      - name: GIT_AUTHOR_NAME
+        value: $(params.actor-name)
+      - name: GIT_AUTHOR_EMAIL
+        value: $(params.actor-email)
+      - name: MANIFEST_FILE
+        value: environments/overlays/dev/patches/patch-$(params.repo-name)-image.yaml
+      - name: COMMIT_MSG
+        value: $(params.message)
 

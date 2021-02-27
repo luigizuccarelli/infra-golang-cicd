@@ -54,7 +54,7 @@ spec:
           - name: url
             value: $(tt.params.repo-url)
             
-      - name: argocd-git-source
+      - name: git-infra-repo
         resourceSpec:
           type: git
           params:

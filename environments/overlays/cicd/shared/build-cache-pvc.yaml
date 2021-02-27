@@ -1,11 +1,11 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: pipeline-pvc-dev
+  name: build-cache-pvc-dev
 spec:
   accessModes:
     - ReadWriteOnce
   storageClassName: nfs-storage 
   resources:
     requests:
-      storage: 5Gi
+      storage: 2Gi

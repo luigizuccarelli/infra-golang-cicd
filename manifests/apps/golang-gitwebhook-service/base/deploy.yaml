@@ -86,7 +86,7 @@ spec:
           imagePullPolicy: Always
           terminationMessagePolicy: File
           image: >-
-            quay.io/luigizuccarelli/golang-gitwebhook-interface:1.15.6
+            quay.io/luigizuccarelli/golang-gitwebhook-service:1.16.3
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst

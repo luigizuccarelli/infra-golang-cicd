@@ -1,0 +1,200 @@
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: clone-patch-image
+  labels:
+    app.kubernetes.io/version: "0.3"
+  annotations:
+    tekton.dev/pipelines.minVersion: "0.21.0"
+    tekton.dev/tags: git
+    tekton.dev/displayName: "git clone"
+spec:
+  description: >-
+    These Tasks are Git tasks to work with repositories used by other tasks
+    in your Pipeline.
+
+    The git-clone Task will clone a repo from the provided url into the
+    output Workspace. By default the repo will be cloned into the root of
+    your Workspace. You can clone into a subdirectory by setting this Task's
+    subdirectory param. This Task also supports sparse checkouts. To perform
+    a sparse checkout, pass a list of comma separated directory patterns to
+    this Task's sparseCheckoutDirectories param.
+
+  workspaces:
+    - name: output
+      description: The git repo will be cloned onto the volume backing this workspace
+
+  params:
+    - name: URL
+      description: git url to clone
+      type: string
+    - name: repo-name
+      description: the base name for image change
+      type: string
+    - name: revision
+      description: git revision to checkout (branch, tag, sha, ref…)
+      type: string
+      default: "master"
+    - name: commit-hash
+      description: The current commit hash
+      type: string
+      default: ""
+    - name: deleteExisting
+      description: clean out the contents of the repo's destination directory (if it already exists) before trying to clone the repo there
+      type: string
+      default: "true"
+    - name: gitInitImage
+      description: the image used where the git-init binary is
+      type: string
+      default: "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.21.0"
+    - name: GIT_AUTHOR_NAME
+      type: string
+      description: |
+        The author name.
+    - name: GIT_AUTHOR_EMAIL
+      type: string
+      description: |
+        The author email.
+    - name: MANIFEST_FILE
+      type: string
+      description: |
+        Name of image patch file to update.
+    - name: COMMIT_MSG
+      type: string
+      description: |
+        Commit message.
+
+  results:
+    - name: commit
+      description: The precise commit SHA that was fetched by this Task
+    - name: url
+      description: The precise URL that was fetched by this Task
+
+  steps:
+    - name: clone
+      image: $(params.gitInitImage)
+      securityContext:
+        runAsUser: 0
+      
+      script: |
+        #!/bin/sh
+        set -eu -o pipefail
+
+        if [[ "$(params.verbose)" == "true" ]] ; then
+          set -x
+        fi
+  
+        repo=$(echo -n "$(params.URL)" | grep -o "infra[a-z0-9-]*")
+
+        CHECKOUT_DIR="$(workspaces.output.path)/$repo"
+
+        cleandir() {
+          # Delete any existing contents of the repo directory if it exists.
+          #
+          # We don't just "rm -rf $CHECKOUT_DIR" because $CHECKOUT_DIR might be "/"
+          # or the root of a mounted volume.
+          if [[ -d "$CHECKOUT_DIR" ]] ; then
+            # Delete non-hidden files and directories
+            rm -rf "$CHECKOUT_DIR"/*
+            # Delete files and directories starting with . but excluding ..
+            rm -rf "$CHECKOUT_DIR"/.[!.]*
+            # Delete files and directories starting with .. plus any other character
+            rm -rf "$CHECKOUT_DIR"/..?*
+          fi
+        }
+
+        if [[ "$(params.deleteExisting)" == "true" ]] ; then
+          cleandir
+        fi
+
+        /ko-app/git-init \
+          -url "$(params.URL)" \
+          -revision "$(params.revision)" \
+          -path "$CHECKOUT_DIR" 
+
+        cd "$CHECKOUT_DIR"
+
+        EXIT_CODE="$?"
+        # pointless continuing
+        if [ "$EXIT_CODE" != 0 ] ; then
+          exit $EXIT_CODE
+        fi
+        RESULT_SHA="$(git rev-parse HEAD | tr -d '\n')"
+        # Make sure we don't add a trailing newline to the result!
+        echo -n "$RESULT_SHA" > $(results.commit.path)
+        echo -n "$(params.url)" > $(results.url.path)
+    - name: patch
+      image: docker.io/alpine/git:v2.26.2@sha256:23618034b0be9205d9cc0846eb711b12ba4c9b468efdd8a59aac1d7b1a23363f
+      securityContext:
+        runAsUser: 0
+
+      env:
+      - name: NEWURL
+        valueFrom:
+        secretKeyRef:
+          name: git-basic
+          key: url
+
+      script: |
+
+        repo=$(echo -n "$(params.URL)" | grep -o "infra[a-z0-9-]*")
+        CHECKOUT_DIR="$(workspaces.output.path)/$repo"
+        cd $CHECKOUT_DIR
+        
+        # Setting up the config for the git.
+        git config user.email "$(params.GIT_AUTHOR_EMAIL)"
+        git config user.name "$(params.GIT_AUTHOR_NAME)"
+
+        # Squashing the commits if required.
+        if [ "$(params.SQUASH_COUNT)" != 0 ] ; then
+
+          git reset --soft HEAD~$(params.SQUASH_COUNT)
+          git add .
+          git commit -m "$(params.COMMIT_MSG)"
+
+        fi
+        
+        # update the image with our commit hash
+        sed -i 's/'$params.repo-name)':[0-9a-z\-\.]*/'$(params.repo-name)':$(params.commit-hash)/g' $(params.MANIFEST_FILE)
+
+        # Checking if remote is already set up or not.
+        git ls-remote --exit-code $(params.PULL_REMOTE_NAME)
+
+        # Setting up remote url for pull.
+        if test $? != 0; then
+          git remote add $(params.PULL_REMOTE_NAME) $(params.PULL_REMOTE_URL)
+        fi
+
+        # Pull and rebase
+        git pull --rebase --autostash $(params.PULL_REMOTE_NAME) $(params.PULL_BRANCH_NAME)
+
+        # Checking if remote is already set up or not.
+        git ls-remote --exit-code $(params.PUSH_REMOTE_NAME)
+
+        # Setting up remote url for push.
+        if test $? != 0; then
+          git remote add $(params.PUSH_REMOTE_NAME) $(params.PUSH_REMOTE_URL)
+        fi
+
+        # we overwrite the remote url
+        url=$(params.URL)
+        temp_url=${url:7}
+        usr=$(echo -n $(params.USER) | base64 -d)
+        pwd=$(echo -n $(paarms.PWD) | base64 -d)
+        new-url="http://$usr:$pwd@$temp_url)
+        git remote set-url origin $new_url
+
+        git commit -am "$(params.COMMIT_MSG) (patch image)"
+        # Force push after the rebase.
+        git push $(params.PUSH_REMOTE_NAME) $(params.PUSH_BRANCH_NAME) -f
+
+        RESULT_SHA="$(git rev-parse HEAD | tr -d '\n')"
+
+        EXIT_CODE="$?"
+
+        if [ "$EXIT_CODE" != 0 ] ; then
+          exit $EXIT_CODE
+        fi
+        # ensure we don't add a trailing newline to the result
+        echo -n "$RESULT_SHA" > $(results.commit.path)
+        echo -n "$(params.url)" > $(results.url.path)

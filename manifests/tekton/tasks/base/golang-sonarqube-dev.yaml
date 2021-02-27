@@ -70,7 +70,8 @@ spec:
     script: |
       #!/usr/bin/env bash
 
-      sonar-scanner > response.txt
+      sonar-scanner 
+      echo $? 
   - name: sonar-quality-gate
     image:  dwdraju/alpine-curl-jq
     workingDir: /workspace/output/$(params.repo-name)
@@ -83,25 +84,17 @@ spec:
     script: |
       #!/usr/bin/env bash
 
-      status="PENDING"
-      uri=$(cat response.txt | grep -o "$(params.SONAR_HOST_URL)/api/ce/task?id=[A-Za-z0-9\-]*")
-      rm response.txt
-
-      # loop until we have a valid response status
-      while [ "$status" == "PENDING" ] || [ "$status" == "IN_PORGRESS" ];
-      do
-        sleep 2;
-        status=$(curl -u "$SONAR_TOKEN:" -H 'Content-Type: application/json' -H 'Accept: application/json'  "$uri" | jq '.task.status')
-        echo "status check::: $status";
-      done
-      echo "See Quality Gate Sonarqube Scan results: $uri"
+      uri=$(params.SONAR_HOST_URL)/api/qualitygates/project_status?projectKey=$(params.SONAR_PROJECT_KEY)
+      echo -e "$SONAR_TOKEN: $uri\n"
+      status=$(curl -s -u "$SONAR_TOKEN:" -H 'Content-Type: application/json' -H 'Accept: application/json'  "$uri" | jq '.projectStatus.status')
+      echo -e "status check:$status:\n"
       # check to see if the job was succesful
-      if [ "$status" != "\"SUCCESS\"" ];
+      if [ "$status" != "\"OK\"" ];
       then
-        echo "SONARQUBE SCAN FAILED!"
-        exit -1
+        echo -e "SONARQUBE SCAN FAILED!\n"
+        exit 1
       else
-        echo "SONARQUBE SCAN PASSED!"
+        echo -e "SONARQUBE SCAN PASSED!\n"
         exit 0
       fi
  

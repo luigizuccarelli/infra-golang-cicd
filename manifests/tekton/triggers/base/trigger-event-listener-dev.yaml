@@ -4,9 +4,9 @@ kind: EventListener
 metadata:
   name: eventlistener-dev
 spec:
-  
   triggers:
   - bindings: 
-    - ref: trigger-binding-dev
+      - kind: TriggerBinding
+        ref: trigger-binding-dev
     template: 
-      name: trigger-template-dev
+      ref: trigger-template-dev
